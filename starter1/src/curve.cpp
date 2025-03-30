@@ -35,29 +35,13 @@ inline bool approx(const Vector3f& lhs, const Vector3f& rhs)
 */
 Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 {
+	////////////////////// start of debug information ////////////////////////
 	// Check
 	if (P.size() < 4 || P.size() % 3 != 1)
 	{
 		cerr << "evalBezier must be called with 3n+1 control points." << endl;
 		exit(0);
 	}
-
-	// TODO:
-	// You should implement this function so that it returns a Curve
-	// (e.g., a vector< CurvePoint >).  The variable "steps" tells you
-	// the number of points to generate on each piece of the spline.
-	// At least, that's how the sample solution is implemented and how
-	// the SWP files are written.  But you are free to interpret this
-	// variable however you want, so long as you can control the
-	// "resolution" of the discretized spline curve with it.
-
-	// Make sure that this function computes all the appropriate
-	// Vector3fs for each CurvePoint: V,T,N,B.
-	// [NBT] should be unit and orthogonal.
-
-	// Also note that you may assume that all Bezier curves that you
-	// receive have G1 continuity.  Otherwise, the TNB will not be
-	// be defined at points where this does not hold.
 
 	cerr << "\t>>> evalBezier has been called with the following input:" << endl;
 
@@ -69,50 +53,45 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 
 	cerr << "\t>>> Steps (type steps): " << steps << endl;
 
+	////////////////////// end of debug information ////////////////////////
+
 	int numPieces = (P.size() - 1) / 3;
 	Curve Bezier;
 
 	// for each piece of the curve, we compute the curve points
 	for (int i = 0; i < numPieces; ++i){
-		// the control points for this piece
-		// we don't have 4*3 matrix in vecmath so we can only use seperate 
-		// vectors; I'll implement it if we have time. 
-		Vector3f p0 = P[i * 3];
-		Vector3f p1 = P[i * 3 + 1];
-		Vector3f p2 = P[i * 3 + 2];
-		Vector3f p3 = P[i * 3 + 3];
+
+		Matrix4f G_bezier(
+			P[i * 3][0], P[i * 3 + 1][0], P[i * 3 + 2][0], P[i * 3 + 3][0],
+			P[i * 3][1], P[i * 3 + 1][1], P[i * 3 + 2][1], P[i * 3 + 3][1],
+			P[i * 3][2], P[i * 3 + 1][2], P[i * 3 + 2][2], P[i * 3 + 3][2],
+			0, 0, 0, 0);
 
 		// P = GMT
-		for (int q = 0; q < steps; ++q){
+		for (unsigned q = 0; q < steps; ++q){
+
 			if (i != 0 && q == 0){
 				// if not the first piece, the first point is shared
 				continue;
 			}
 			float t = (float) q / steps;
-			// T for the point itself
+
+			// T for the point position
 			Vector4f T_normal(1, t, t * t, t * t * t);
 			Vector4f MT_normal = M_bez * T_normal;	// 4*1 vector
 
 			// T for the tangent
 			Vector4f T_tangent(0, 1, 2 * t, 3 * t * t);
 			Vector4f MT_tangent = M_bez * T_tangent;
+
 			// compute the curve point
 			CurvePoint cp;
-			for (int j = 0; j < 3; ++j){
-				Vector4f G_j(p0[j], p1[j], p2[j], p3[j]);
-				// the j-th component of the curve point
-				float V_j = Vector4f::dot(G_j, MT_normal);
-				cp.V[j] = V_j;
-
-				// the j-th component of the tangent
-				float T_j = Vector4f::dot(G_j, MT_tangent);
-				cp.T[j] = T_j;
-			}
-
-			cp.T.normalize();
+			cp.V = (G_bezier * MT_normal).xyz();
+			cp.T = (G_bezier * MT_tangent).xyz().normalized();
 
 			// next, we compute the N and B vectors
-			Vector3f B_0 = Vector3f::cross(Vector3f(0, 0, 1), cp.T).normalized();
+			Vector3f B_0 = Vector3f::cross(Vector3f(0, 0, 1), cp.T)
+															.normalized();
 			// if t==0, use B_0 to compute N; else use B_t-1
 			if (i == 0 && q == 0){
 				cp.N = Vector3f::cross(B_0, cp.T).normalized();
@@ -128,22 +107,17 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 	}
 
 	return Bezier;
-
 }
 
 Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 {
+	////////////////////// start of debug information ////////////////////////
 	// Check
 	if (P.size() < 4)
 	{
 		cerr << "evalBspline must be called with 4 or more control points." << endl;
 		exit(0);
 	}
-
-	// TODO:
-	// It is suggested that you implement this function by changing
-	// basis from B-spline to Bezier.  That way, you can just call
-	// your evalBezier function.
 
 	cerr << "\t>>> evalBSpline has been called with the following input:" << endl;
 
@@ -156,21 +130,14 @@ Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 	cerr << "\t>>> Steps (type steps): " << steps << endl;
 	cerr << "\t>>> Returning empty curve." << endl;
 
-	// Return an empty curve right now.
-	// return Curve();
+	////////////////////// end of debug information ////////////////////////
 
 	Matrix4f M_bez_inv = M_bez.inverse();
 	Matrix4f new_M = M_bspline * M_bez_inv;
 
-	cout << "Transformation Matrix (new_M): " << endl;
-
-	new_M.print();
-
 	int numPieces = P.size() - 3;
 
 	Curve Bspline;
-
-	int cp_cnt = 0;
 
 	for (int i = 0; i < numPieces; ++i){
 
@@ -184,8 +151,6 @@ Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 		vector<Vector3f> G_bezier;
 
 		for (int j = 0; j < 4; ++j){
-			cp_cnt++;
-			printf("add a control point at i = %d, j = %d, total: %d\n", i, j, cp_cnt);
 			Vector3f G_bez = G_bez_matrix.getCol(j).xyz();
 			G_bez.print();
 			G_bezier.push_back(G_bez);
