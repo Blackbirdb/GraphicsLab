@@ -17,7 +17,10 @@ inline bool approx(const Vector3f& lhs, const Vector3f& rhs)
 
 }
 
-
+/**
+ * P: vector of control points
+ * steps: number of points on each piece of the spline
+*/
 Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 {
 	// Check
@@ -53,10 +56,73 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 	}
 
 	cerr << "\t>>> Steps (type steps): " << steps << endl;
-	cerr << "\t>>> Returning empty curve." << endl;
 
-	// Right now this will just return this empty curve.
-	return Curve();
+	int numPieces = (P.size() - 1) / 3;
+	Curve Bezier;
+
+	// for each piece of the curve, we compute the curve points
+	for (int i = 0; i < numPieces; ++i){
+		// the control points for this piece
+		// we don't have 4*3 matrix in vecmath so we can only use seperate 
+		// vectors; I'll implement it if we have time. 
+		Vector3f p0 = P[i * 3];
+		Vector3f p1 = P[i * 3 + 1];
+		Vector3f p2 = P[i * 3 + 2];
+		Vector3f p3 = P[i * 3 + 3];
+
+		// Bezier basis
+		Matrix4f M(1, -3, 3, -1,
+				   0, 3, -6, 3,
+				   0, 0, 3, -3,
+				   0, 0, 0, 1);
+
+		// P = GMT
+		for (int q = 0; q < steps; ++q){
+			if (i != 0 && q == 0){
+				// if not the first piece, the first point is shared
+				continue;
+			}
+			float t = (float) q / steps;
+			// T for the point itself
+			Vector4f T_normal(1, t, t * t, t * t * t);
+			Vector4f MT_normal = M * T_normal;	// 4*1 vector
+
+			// T for the tangent
+			Vector4f T_tangent(0, 1, 2 * t, 3 * t * t);
+			Vector4f MT_tangent = M * T_tangent;
+			// compute the curve point
+			CurvePoint cp;
+			for (int j = 0; j < 3; ++j){
+				Vector4f G_j(p0[j], p1[j], p2[j], p3[j]);
+				// the j-th component of the curve point
+				float V_j = Vector4f::dot(G_j, MT_normal);
+				cp.V[j] = V_j;
+
+				// the j-th component of the tangent
+				float T_j = Vector4f::dot(G_j, MT_tangent);
+				cp.T[j] = T_j;
+			}
+
+			cp.T.normalize();
+
+			// next, we compute the N and B vectors
+			Vector3f B_0 = Vector3f::cross(Vector3f(0, 0, 1), cp.T).normalized();
+			// if t==0, use B_0 to compute N; else use B_t-1
+			if (i == 0 && q == 0){
+				cp.N = Vector3f::cross(B_0, cp.T).normalized();
+			}
+			else{
+				cp.N = Vector3f::cross(Bezier.back().B, cp.T).normalized();
+			}
+			cp.B = Vector3f::cross(cp.T, cp.N).normalized();
+
+			// finished generating the curve point, add to curve
+			Bezier.push_back(cp);
+		}
+	}
+
+	return Bezier;
+
 }
 
 Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
