@@ -4,6 +4,18 @@ using namespace std;
 
 const float c_pi = 3.14159265358979323846f;
 
+// B-spline basis
+const Matrix4f M_bspline(1.0/6, -1.0/2, 1.0/2, -1.0/6,
+						 2.0/3, 0, -1, 1.0/2,
+						 1.0/6, 1.0/2, 1.0/2, -1.0/2,
+						 0, 0, 0, 1.0/6);
+
+// Bezier basis
+const Matrix4f M_bez(1, -3, 3, -1,
+					 0, 3, -6, 3,
+					 0, 0, 3, -3,
+					 0, 0, 0, 1);
+
 namespace
 {
 // Approximately equal to.  We don't want to use == because of
@@ -70,12 +82,6 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 		Vector3f p2 = P[i * 3 + 2];
 		Vector3f p3 = P[i * 3 + 3];
 
-		// Bezier basis
-		Matrix4f M(1, -3, 3, -1,
-				   0, 3, -6, 3,
-				   0, 0, 3, -3,
-				   0, 0, 0, 1);
-
 		// P = GMT
 		for (int q = 0; q < steps; ++q){
 			if (i != 0 && q == 0){
@@ -85,11 +91,11 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 			float t = (float) q / steps;
 			// T for the point itself
 			Vector4f T_normal(1, t, t * t, t * t * t);
-			Vector4f MT_normal = M * T_normal;	// 4*1 vector
+			Vector4f MT_normal = M_bez * T_normal;	// 4*1 vector
 
 			// T for the tangent
 			Vector4f T_tangent(0, 1, 2 * t, 3 * t * t);
-			Vector4f MT_tangent = M * T_tangent;
+			Vector4f MT_tangent = M_bez * T_tangent;
 			// compute the curve point
 			CurvePoint cp;
 			for (int j = 0; j < 3; ++j){
@@ -151,7 +157,45 @@ Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 	cerr << "\t>>> Returning empty curve." << endl;
 
 	// Return an empty curve right now.
-	return Curve();
+	// return Curve();
+
+	Matrix4f M_bez_inv = M_bez.inverse();
+	Matrix4f new_M = M_bspline * M_bez_inv;
+
+	cout << "Transformation Matrix (new_M): " << endl;
+
+	new_M.print();
+
+	int numPieces = P.size() - 3;
+
+	Curve Bspline;
+
+	int cp_cnt = 0;
+
+	for (int i = 0; i < numPieces; ++i){
+
+		Matrix4f G_bspline (P[i][0], P[i + 1][0], P[i + 2][0], P[i + 3][0],
+							P[i][1], P[i + 1][1], P[i + 2][1], P[i + 3][1],
+							P[i][2], P[i + 1][2], P[i + 2][2], P[i + 3][2],
+							0, 0, 0, 0);
+		Matrix4f G_bez_matrix = G_bspline * new_M;
+			// control points in first 3 rows
+
+		vector<Vector3f> G_bezier;
+
+		for (int j = 0; j < 4; ++j){
+			cp_cnt++;
+			printf("add a control point at i = %d, j = %d, total: %d\n", i, j, cp_cnt);
+			Vector3f G_bez = G_bez_matrix.getCol(j).xyz();
+			G_bez.print();
+			G_bezier.push_back(G_bez);
+		}
+
+		Curve Bezier = evalBezier(G_bezier, steps);
+		Bspline.insert(Bspline.end(), Bezier.begin(), Bezier.end());
+	}
+
+	return Bspline;
 }
 
 Curve evalCircle(float radius, unsigned steps)

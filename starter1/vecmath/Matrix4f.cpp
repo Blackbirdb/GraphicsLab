@@ -219,7 +219,11 @@ float Matrix4f::determinant() const
 	return( m00 * cofactor00 + m01 * cofactor01 + m02 * cofactor02 + m03 * cofactor03 );
 }
 
-Matrix4f Matrix4f::inverse( bool* pbIsSingular, float epsilon ) const
+/**
+ * pbIsSingular: 矩阵是否是奇异（不可逆）的
+ * epsilon: 如果abs(行列式) < epsilon，则认为矩阵是不可逆的
+ */
+Matrix4f Matrix4f::inverse(bool* pbIsSingular, float epsilon) const
 {
 	float m00 = m_elements[ 0 ];
 	float m10 = m_elements[ 1 ];
