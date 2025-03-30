@@ -74,24 +74,22 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 				// if not the first piece, the first point is shared
 				continue;
 			}
+
 			float t = (float) q / steps;
 
 			// T for the point position
 			Vector4f T_normal(1, t, t * t, t * t * t);
-			Vector4f MT_normal = M_bez * T_normal;	// 4*1 vector
-
 			// T for the tangent
 			Vector4f T_tangent(0, 1, 2 * t, 3 * t * t);
-			Vector4f MT_tangent = M_bez * T_tangent;
 
-			// compute the curve point
+			// compute the curve point and tangent
 			CurvePoint cp;
-			cp.V = (G_bezier * MT_normal).xyz();
-			cp.T = (G_bezier * MT_tangent).xyz().normalized();
+			cp.V = (G_bezier * M_bez * T_normal).xyz();
+			cp.T = (G_bezier * M_bez * T_tangent).xyz().normalized();
 
 			// next, we compute the N and B vectors
-			Vector3f B_0 = Vector3f::cross(Vector3f(0, 0, 1), cp.T)
-															.normalized();
+			Vector3f B_0 = Vector3f(0, 0, 1);
+			
 			// if t==0, use B_0 to compute N; else use B_t-1
 			if (i == 0 && q == 0){
 				cp.N = Vector3f::cross(B_0, cp.T).normalized();
@@ -100,6 +98,15 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 				cp.N = Vector3f::cross(Bezier.back().B, cp.T).normalized();
 			}
 			cp.B = Vector3f::cross(cp.T, cp.N).normalized();
+
+			cout << "V: " << endl;
+			cp.V.print();
+			cout << "T: " << endl;
+			cp.T.print();
+			cout << "N: " << endl;
+			cp.N.print();
+			cout << "B: " << endl;
+			cp.B.print();
 
 			// finished generating the curve point, add to curve
 			Bezier.push_back(cp);
@@ -152,7 +159,6 @@ Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 
 		for (int j = 0; j < 4; ++j){
 			Vector3f G_bez = G_bez_matrix.getCol(j).xyz();
-			G_bez.print();
 			G_bezier.push_back(G_bez);
 		}
 
