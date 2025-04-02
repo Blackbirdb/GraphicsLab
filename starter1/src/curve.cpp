@@ -99,15 +99,6 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 			}
 			cp.B = Vector3f::cross(cp.T, cp.N).normalized();
 
-			cout << "V: " << endl;
-			cp.V.print();
-			cout << "T: " << endl;
-			cp.T.print();
-			cout << "N: " << endl;
-			cp.N.print();
-			cout << "B: " << endl;
-			cp.B.print();
-
 			// finished generating the curve point, add to curve
 			Bezier.push_back(cp);
 		}
