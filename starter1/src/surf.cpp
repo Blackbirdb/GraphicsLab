@@ -94,7 +94,7 @@ Surface makeSurfRev(const Curve& profile, unsigned steps){
     return surface;
 }
 
-Matrix4f generate_M(CurvePoint point){
+Matrix4f generate_trans_M(CurvePoint point){
     Vector4f tmp_n = Vector4f(point.N, 0.0f);
     Vector4f tmp_b = Vector4f(point.B, 0.0f);
     Vector4f tmp_t = Vector4f(point.T, 0.0f);
@@ -107,7 +107,7 @@ Matrix4f generate_M(CurvePoint point){
 
 Matrix4f inverseTranspose(const Matrix4f& m){
     bool isSingular;
-    
+
     Matrix4f inverseMat = m.inverse(&isSingular);
     inverseMat.transpose();
 
@@ -125,17 +125,17 @@ Surface makeGenCyl(const Curve& profile, const Curve& sweep){
 
     for (unsigned j = 0; j < sweep.size(); j++){
         for (unsigned i = 0; i < profile.size(); i++){
-            // Create rotation matrix around y-axis
-            Matrix4f rot = generate_M(sweep[j]);
+            // Create transformation matrix for the current sweep point
+            Matrix4f trans_M = generate_trans_M(sweep[j]);
 
-            // Rotate vertex position
-            Vector4f rotatedV = rot * Vector4f(profile[i].V, 1.0f);
-            surface.VV.push_back(rotatedV.xyz());
+            // Transform vertex 
+            Vector4f transformed_V = trans_M * Vector4f(profile[i].V, 1.0f);
+            surface.VV.push_back(transformed_V.xyz());
 
-            // Rotate normal (using the upper 3x3 part of the rotation matrix)
-            Matrix4f tmp = inverseTranspose(rot);
-            Vector4f res = tmp * Vector4f(profile[i].N, 1.0f);
-            surface.VN.push_back(-res.xyz());
+            // Transform normal
+            Vector4f transformed_N =
+                inverseTranspose(trans_M) * Vector4f(profile[i].N, 1.0f);
+            surface.VN.push_back(-transformed_N.xyz());
         }
     }
 
