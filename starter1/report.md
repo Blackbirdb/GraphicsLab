@@ -38,7 +38,7 @@ $$
 此后，我们需要计算曲线在该点的法线和次法线。根据所提供的公式，我们可以递归地更新方程：
 
 $$
-    B_0 = (0,0,1) \times T_1\\
+B_0 = (0,0,1) \times T_1\\
     N_i = (B_{i-1} \times T_i).normalized()\\
     B_i = (T_i \times N_i).normalized()\\
 $$
@@ -71,4 +71,66 @@ $$
 
 ### 实验结果
 
-![curve_result](img/curve_result.jpg)
+
+
+## 任务2：曲面的绘制
+
+### 任务要求
+
+在`surf.cpp`中填写`makeSurfRev`和`makeGenCyl`函数，第一个函数生成旋转曲面，第二个函数生成广义圆柱体。
+
+#### 旋转曲面
+
+给定一条曲线，包含它的点坐标、法线向量、次法线向量、切向量。再给定旋转的步数，返回这条曲线以y轴正方向为轴，逆时针旋转变换生成的旋转体。
+
+沿着曲线将曲线中的每一个点和向量都做如下的变换，每次旋转角度为`2π / steps`，并将它们存在`surface.VV`和`surface.VN`里：
+$$
+M = R_y(\theta) = 
+\begin{bmatrix}
+\cos \theta & 0 & \sin \theta & 0 \\
+0 & 1 & 0 & 0 \\
+-\sin \theta & 0 & \cos \theta & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+$$
+
+$$
+P' = M \cdot P
+$$
+
+$$
+N' = \text{normalize}\left((M^{-1})^T N\right)
+$$
+
+其中需要注意的是要将原本的点坐标和法向量做齐次化的变换。
+
+随后便是三角形的生成。按照文档的要求实现了`generate_triangles`函数，根据`profileSize`和`steps`为`surface`生成三角形面的顶点坐标集。顺序如下图所示：
+
+![triangle](img/triangle.png)
+
+#### 广义圆柱体
+
+广义圆柱体需要将形状曲线按扫掠曲线的坐标系进行变换。即对于广义曲线的每一个点，都要用扫掠曲线的M矩阵做变换，并存到`surface.VV`当中。
+
+法向量也要做如下的变换，并存到`surface.VN`当中
+$$
+M  = 
+\begin{bmatrix}
+\ N & B & \ T  & V \\
+0 & 0 & 0 & 1 \\
+\end{bmatrix}
+$$
+
+$$
+P' = M \cdot P
+$$
+
+$$
+N' = \text{normalize}\left((M^{-1})^T N\right)
+$$
+
+其中需要注意的是要将原本的点坐标和法向量做齐次化的变换.
+
+三角形面的生成用`generate_triangles`函数即可。
+
+### 实验结果
