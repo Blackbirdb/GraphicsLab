@@ -134,33 +134,27 @@ Surface makeGenCyl(const Curve& profile, const Curve& sweep){
         exit(0);
     }
 
-    vector<Matrix4f> matrices;
-    for (unsigned i=0; i<sweep.size(); i++)
-    {
-        matrices.push_back(generate_M(sweep[i]));
-    }
-    for(unsigned j=0; j<sweep.size(); j++){
-        for(unsigned i=0; i<profile.size(); i++)
-        {
+    for (unsigned j = 0; j < sweep.size(); j++){
+        for (unsigned i = 0; i < profile.size(); i++){
             // Create rotation matrix around y-axis
-            Matrix4f rot = matrices[j];
-            
+            Matrix4f rot = generate_M(sweep[j]);
+
             // Rotate vertex position
             Vector4f rotatedV = rot * Vector4f(profile[i].V, 1.0f);
-            surface.VV.push_back(Vector3f(rotatedV[0], rotatedV[1], rotatedV[2]));
-            
+            surface.VV.push_back(rotatedV.xyz());
+
             // Rotate normal (using the upper 3x3 part of the rotation matrix)
             Matrix4f tmp = inverseTranspose(rot);
             Vector4f res = tmp * Vector4f(profile[i].N, 1.0f);
-            surface.VN.push_back(-Vector3f(res[0], res[1], res[2]));
-        }  
+            surface.VN.push_back(-res.xyz());
+        }
     }
 
     // Create triangle faces
     unsigned profileSize = profile.size();
     unsigned sweep_size = sweep.size();
     generate_triangles(profileSize, sweep_size, surface);
-    
+
     return surface;
 }
 
