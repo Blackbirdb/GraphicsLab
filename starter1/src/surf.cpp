@@ -76,7 +76,6 @@ Surface makeSurfRev(const Curve& profile, unsigned steps){
 
         // Rotate each point in the profile curve
         for (const auto& point : profile){
-
             // Rotate vertex position
             Vector3f rotatedV = rot * point.V;
             surface.VV.push_back(rotatedV);
@@ -90,7 +89,6 @@ Surface makeSurfRev(const Curve& profile, unsigned steps){
 
     // Create triangle faces
     unsigned profileSize = profile.size();
-
     generate_triangles(profileSize, steps, surface);
 
     return surface;
@@ -109,17 +107,8 @@ Matrix4f generate_M(CurvePoint point){
 
 Matrix4f inverseTranspose(const Matrix4f& m){
     bool isSingular;
-    // 首先计算逆矩阵
+    
     Matrix4f inverseMat = m.inverse(&isSingular);
-
-    // 检查矩阵是否奇异（不可逆）
-    if (isSingular){
-        // 对于奇异矩阵，可以返回单位矩阵或其他处理方式
-        // 这里我们直接返回单位矩阵
-        return Matrix4f::identity();
-    }
-
-    // 然后转置逆矩阵
     inverseMat.transpose();
 
     return inverseMat;
