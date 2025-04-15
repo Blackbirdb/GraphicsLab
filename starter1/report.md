@@ -68,6 +68,14 @@ $$
 
 ### 实验结果
 
+![curve_res1](img/curve_res1.PNG)
+
+![curve_res2](img/curve_res2.PNG)
+
+![curve_res3](img/curve_res3.PNG)
+
+![curve_res4](img/curve_res4.PNG)
+
 ## 任务2：曲面的绘制
 
 ### 任务要求
@@ -131,6 +139,12 @@ $$
 三角形面的生成用 `generate_triangles`函数即可。
 
 ### 实验结果
+
+![surface_res1](img/surface_res1.PNG)
+
+![surface_res2](img/surface_res2.PNG)
+
+![surface_res3](img/surface_res3.PNG)
 
 ## 拓展：曲面的闭合问题
 
