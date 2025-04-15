@@ -2,7 +2,7 @@
 
 > 黄宝岱 22307130480
 > 
-> 秦雯钧
+> 秦雯钧 22300240024
 
 ## 任务一：曲线的绘制
 
@@ -16,7 +16,7 @@
 
 连续的Bezier曲线的每一段之间共享一个控制点，因此总曲线段数为：
 
-$$ 
+$$
 \text{numSegments} = \frac{\text{numControlPoints} - 1}{\text{degree}}
 $$
 
@@ -51,7 +51,7 @@ $$
 #### B样条曲线
 
 我们将B样条曲线的控制点转换为Bezier曲线的控制点，以实现B样条曲线的绘制。B样条曲线的每段之间共享三个控制点，因此总曲线段数为：
-$$ 
+$$
 \text{numSegments} = \text{numControlPoints} - 3
 $$
 

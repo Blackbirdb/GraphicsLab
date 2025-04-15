@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.xpr": "systemverilog",
+        "vector": "cpp"
+    }
+}
