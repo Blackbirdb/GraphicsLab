@@ -68,7 +68,7 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 			0, 0, 0, 0);
 
 		// P = GMT
-		for (unsigned q = 0; q < steps; ++q){
+		for (unsigned q = 0; q <= steps; ++q){
 
 			if (i != 0 && q == 0){
 				// if not the first piece, the first point is shared
