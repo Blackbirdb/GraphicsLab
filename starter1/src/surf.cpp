@@ -34,6 +34,22 @@ Surface quad(){
     return ret;
 }
 
+void generate_triangles(unsigned profileSize, unsigned steps, Surface& surface){
+    std::vector< Tup3u > triangles;
+
+    for (unsigned j = 0; j < steps; ++j){
+        for (unsigned i = 0; i < profileSize - 1; ++i){
+            // Current and next profile indices
+            unsigned curr = j * profileSize + i;
+            unsigned next = ((j + 1) % (steps)) * profileSize + i;
+
+            // Create two triangles for each quad
+            surface.VF.push_back(Tup3u(curr, curr + 1, next));
+            surface.VF.push_back(Tup3u(next, curr + 1, next + 1));
+        }
+    }
+}
+
 Surface makeSurfRev(const Curve& profile, unsigned steps){
     Surface surface;
 
@@ -75,37 +91,9 @@ Surface makeSurfRev(const Curve& profile, unsigned steps){
     // Create triangle faces
     unsigned profileSize = profile.size();
 
-
-
-    for (unsigned i = 0; i < steps; ++i){
-        for (unsigned j = 0; j < profileSize - 1; ++j){
-            // Current and next profile indices
-            unsigned curr = i * profileSize + j;
-            unsigned next = ((i + 1) % (steps + 1)) * profileSize + j;
-
-            // Create two triangles for each quad
-            surface.VF.push_back(Tup3u(curr, curr + 1, next));
-            surface.VF.push_back(Tup3u(next, curr + 1, next + 1));
-        }
-    }
+    generate_triangles(profileSize, steps, surface);
 
     return surface;
-}
-
-void generate_triangles(unsigned profileSize, unsigned steps, Surface& surface){
-    std::vector< Tup3u > triangles;
-
-    for (unsigned j = 0; j < steps; ++j){
-        for (unsigned i = 0; i < profileSize - 1; ++i){
-            // Current and next profile indices
-            unsigned curr = j * profileSize + i;
-            unsigned next = ((j + 1) % (steps + 1)) * profileSize + i;
-
-            // Create two triangles for each quad
-            surface.VF.push_back(Tup3u(curr, curr + 1, next));
-            surface.VF.push_back(Tup3u(next, curr + 1, next + 1));
-        }
-    }
 }
 
 Matrix4f generate_M(CurvePoint point){
@@ -171,17 +159,8 @@ Surface makeGenCyl(const Curve& profile, const Curve& sweep){
     // Create triangle faces
     unsigned profileSize = profile.size();
     unsigned sweep_size = sweep.size();
-    for (unsigned j = 0; j < sweep_size; ++j){
-        for (unsigned i = 0; i < profileSize - 1; ++i){
-            // Current and next profile indices
-            unsigned curr = j * profileSize + i;
-            unsigned next = ((j + 1) % sweep_size) * profileSize + i;
-
-            // Create two triangles for each quad
-            surface.VF.push_back(Tup3u(curr, curr + 1, next));
-            surface.VF.push_back(Tup3u(next, curr + 1, next + 1));
-        }
-    }
+    generate_triangles(profileSize, sweep_size, surface);
+    
     return surface;
 }
 
