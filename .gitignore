@@ -1,3 +1,7 @@
 .vscode/*
 build
-starter1/sample_solution/athena/a1
+sample_solution
+CMakeLists.txt
+glfw
+evaluate.sh
+starter1/CMakeLists.txt

@@ -7,9 +7,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-if [ "$1" == "sol" ]; then
-    PROGRAM="sample_solution/athena/a1"
-elif [ "$1" == "test" ]; then
+if [ "$1" = "sol" ]; then
+    PROGRAM="sample_solution/mac/a1"
+elif [ "$1" = "test" ]; then
     PROGRAM="build/a1"
 fi
 
