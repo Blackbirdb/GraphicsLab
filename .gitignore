@@ -5,3 +5,4 @@ CMakeLists.txt
 glfw
 evaluate.sh
 starter1/CMakeLists.txt
+.DS_Store
