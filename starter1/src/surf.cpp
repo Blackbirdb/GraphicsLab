@@ -134,7 +134,7 @@ Surface makeGenCyl(const Curve& profile, const Curve& sweep){
 
             // Transform normal
             Vector4f transformed_N =
-                inverseTranspose(trans_M) * Vector4f(profile[i].N, 1.0f);
+                inverseTranspose(trans_M) * Vector4f(profile[i].N, 0.0f);
             surface.VN.push_back(-transformed_N.xyz());
         }
     }
