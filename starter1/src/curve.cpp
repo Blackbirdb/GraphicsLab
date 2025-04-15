@@ -33,27 +33,7 @@ inline bool approx(const Vector3f& lhs, const Vector3f& rhs)
  * P: vector of control points
  * steps: number of points on each piece of the spline
 */
-Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
-{
-	////////////////////// start of debug information ////////////////////////
-	// Check
-	if (P.size() < 4 || P.size() % 3 != 1)
-	{
-		cerr << "evalBezier must be called with 3n+1 control points." << endl;
-		exit(0);
-	}
-
-	cerr << "\t>>> evalBezier has been called with the following input:" << endl;
-
-	cerr << "\t>>> Control points (type vector< Vector3f >): " << endl;
-	for (int i = 0; i < (int)P.size(); ++i)
-	{
-		cerr << "\t>>> " << P[i] << endl;
-	}
-
-	cerr << "\t>>> Steps (type steps): " << steps << endl;
-
-	////////////////////// end of debug information ////////////////////////
+Curve evalBezier(const vector< Vector3f >& P, unsigned steps) {
 
 	int numPieces = (P.size() - 1) / 3;
 	Curve Bezier;
@@ -104,38 +84,24 @@ Curve evalBezier(const vector< Vector3f >& P, unsigned steps)
 		}
 	}
 
+	if (approx(Bezier.front().V, Bezier.back().V) &&
+		approx(Bezier.front().T, Bezier.back().T) &&
+		!approx(Bezier.front().N, Bezier.back().N)){
+		
+		interpolateCurve(Bezier);
+	}
+
 	return Bezier;
 }
 
-Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
-{
-	////////////////////// start of debug information ////////////////////////
-	// Check
-	if (P.size() < 4)
-	{
-		cerr << "evalBspline must be called with 4 or more control points." << endl;
-		exit(0);
-	}
-
-	cerr << "\t>>> evalBSpline has been called with the following input:" << endl;
-
-	cerr << "\t>>> Control points (type vector< Vector3f >): " << endl;
-	for (int i = 0; i < (int)P.size(); ++i)
-	{
-		cerr << "\t>>> " << P[i] << endl;
-	}
-
-	cerr << "\t>>> Steps (type steps): " << steps << endl;
-	cerr << "\t>>> Returning empty curve." << endl;
-
-	////////////////////// end of debug information ////////////////////////
+Curve evalBspline(const vector< Vector3f >& P, unsigned steps) {
 
 	Matrix4f M_bez_inv = M_bez.inverse();
 	Matrix4f new_M = M_bspline * M_bez_inv;
 
 	int numPieces = P.size() - 3;
 
-	Curve Bspline;
+	vector<Vector3f> G_bezier;
 
 	for (int i = 0; i < numPieces; ++i){
 
@@ -144,20 +110,23 @@ Curve evalBspline(const vector< Vector3f >& P, unsigned steps)
 							P[i][2], P[i + 1][2], P[i + 2][2], P[i + 3][2],
 							0, 0, 0, 0);
 		Matrix4f G_bez_matrix = G_bspline * new_M;
-			// control points in first 3 rows
+		// control points in first 3 rows
+		
+		if (i == 0){ // if first piece, we need to add the first point
+			Vector3f G_bez = G_bez_matrix.getCol(0).xyz();
+			G_bezier.push_back(G_bez);
+		}
 
-		vector<Vector3f> G_bezier;
-
-		for (int j = 0; j < 4; ++j){
+		for (int j = 1; j < 4; ++j){
 			Vector3f G_bez = G_bez_matrix.getCol(j).xyz();
 			G_bezier.push_back(G_bez);
 		}
 
-		Curve Bezier = evalBezier(G_bezier, steps);
-		Bspline.insert(Bspline.end(), Bezier.begin(), Bezier.end());
 	}
 
-	return Bspline;
+	Curve Bezier = evalBezier(G_bezier, steps);
+
+	return Bezier;
 }
 
 Curve evalCircle(float radius, unsigned steps)
@@ -237,3 +206,22 @@ void recordCurveFrames(const Curve& curve, VertexRecorder* recorder, float frame
 	}
 }
 
+void interpolateCurve(Curve& curve){
+
+	unsigned steps = curve.size() - 1;
+
+	Vector3f N0 = curve.front().N;
+	Vector3f N1 = curve.back().N;
+
+	// Compute the angle between the two normals
+	float alpha = -acos(Vector3f::dot(N0, N1));
+	float theta = alpha / steps;
+
+	for (int i = 0; i <= steps; ++i){
+		float angle = theta * i;
+
+		curve[i].N =
+			(cos(angle) * curve[i].N + sin(angle) * curve[i].B).normalized();
+		curve[i].B = Vector3f::cross(curve[i].T, curve[i].N).normalized();
+	}
+}

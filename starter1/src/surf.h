@@ -38,7 +38,8 @@ Surface makeGenCyl( const Curve& profile,
 
 void outputObjFile( std::ostream& out, const Surface& surface );
 
-
+Matrix4f inverseTranspose(const Matrix4f& m);
+Matrix4f generate_trans_M(CurvePoint point);
 
 
 

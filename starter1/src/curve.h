@@ -45,6 +45,8 @@ class VertexRecorder;
 // Record the curve vertices
 void recordCurve( const Curve& curve, VertexRecorder* recorder);
 // Record the curve's associated coordinate frames
-void recordCurveFrames( const Curve& curve, VertexRecorder* recorder, float framesize);
+void recordCurveFrames(const Curve& curve, VertexRecorder* recorder, float framesize);
+
+void interpolateCurve(Curve& curve);
 
 #endif

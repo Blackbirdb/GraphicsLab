@@ -35,13 +35,12 @@ Surface quad(){
 }
 
 void generate_triangles(unsigned profileSize, unsigned steps, Surface& surface){
-    std::vector< Tup3u > triangles;
 
     for (unsigned j = 0; j < steps; ++j){
         for (unsigned i = 0; i < profileSize - 1; ++i){
             // Current and next profile indices
             unsigned curr = j * profileSize + i;
-            unsigned next = ((j + 1) % (steps)) * profileSize + i;
+            unsigned next = ((j + 1) % steps) * profileSize + i;
 
             // Create two triangles for each quad
             surface.VF.push_back(Tup3u(curr, curr + 1, next));
@@ -122,7 +121,7 @@ Surface makeGenCyl(const Curve& profile, const Curve& sweep){
         cerr << "surfRev profile curve must be flat on xy plane." << endl;
         exit(0);
     }
-
+    
     for (unsigned j = 0; j < sweep.size(); j++){
         for (unsigned i = 0; i < profile.size(); i++){
             // Create transformation matrix for the current sweep point
