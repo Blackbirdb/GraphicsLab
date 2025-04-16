@@ -199,3 +199,9 @@ N_i' = cos\theta N_i+sin\theta B_i
 $$
 
 最后，我们通过$B_i'=T_i\times N_i'$ 计算次法向量，完成插值旋转。
+
+
+
+## 说明：
+
+`starter1/pics` 中有报告中实验结果的原图，请参考。
