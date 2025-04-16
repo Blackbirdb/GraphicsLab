@@ -4,11 +4,15 @@
 >
 > 秦雯钧 22300240024
 
+
+
 ## 任务一：曲线的绘制
 
 ### 任务要求
 
 在 `curve.cpp`中填写 `evalBezier`和 `evalBspline`函数，生成和显示分段Bezier和B样条曲线，并正确计算其局部坐标系。
+
+---
 
 ### 实现方法
 
@@ -36,8 +40,9 @@ $$
 
 我们用 `vecmath`中的 `Matrix4f`和 `Vector4f`定义了$G_{BEZ}$（$G_{BEZ}$是$3\times 4$的矩阵，矩阵的最后一行补零以符合$4\times 4$的要求）、$M_{BEZ}$以及曲线上点和其切线的不同 $T$，并对其进行矩阵乘法，以获得曲线上点和切线的对应坐标。
 
-此后，我们需要计算曲线在该点的法线和次法线。根据所提供的公式，我们可以递归地更新方程：
+<div style="page-break-after: always;"></div>
 
+此后，我们需要计算曲线在该点的法线和次法线。根据所提供的公式，我们可以递归地更新方程：
 $$
 B_0 = (0,0,1) \times T_1\\
     N_i = (B_{i-1} \times T_i).normalized()\\
@@ -47,6 +52,8 @@ $$
 因此，我们只需调用 `Vector3f::cross`和 `Vector3f::normalized`等函数即可得到法线和次法线。
 
 由于Bezier曲线中，相交曲线间共享一个控制点，因此我们跳过（除第一段曲线外）每段曲线的第一个控制点，以避免重复绘制。
+
+---
 
 #### B样条曲线
 
@@ -66,21 +73,31 @@ $$
 
 获得控制点后，我们调用 `evalBezier`函数，以绘制B样条曲线。
 
+---
+
+<div style="page-break-after: always;"></div>
+
 ### 实验结果
 
-![curve_res1](img/curve_res1.PNG)
+<img src="img/curve_res1.PNG" alt="curve_res1" style="zoom: 60%;" />
 
-![curve_res2](img/curve_res2.PNG)
+<img src="img/curve_res2.PNG" alt="curve_res2" style="zoom: 60%;" />
 
-![curve_res3](img/curve_res3.PNG)
+<img src="img/curve_res3.PNG" alt="curve_res3" style="zoom:67%;" />
 
-![curve_res4](img/curve_res4.PNG)
+<img src="img/curve_res4.PNG" alt="curve_res4" style="zoom:67%;" />
+
+
+
+<div style="page-break-after: always;"></div>
 
 ## 任务2：曲面的绘制
 
 ### 任务要求
 
 在 `surf.cpp`中填写 `makeSurfRev`和 `makeGenCyl`函数，第一个函数生成旋转曲面，第二个函数生成广义圆柱体。
+
+---
 
 #### 旋转曲面
 
@@ -110,7 +127,11 @@ $$
 
 随后便是三角形的生成。按照文档的要求实现了 `generate_triangles`函数，根据 `profileSize`和 `steps`为 `surface`生成三角形面的顶点坐标集。顺序如下图所示：
 
-![triangle](img/triangle.png)
+<img src="img/triangle.png" alt="triangle" style="zoom:80%;" />
+
+
+
+<div style="page-break-after: always;"></div>
 
 #### 广义圆柱体
 
@@ -138,6 +159,10 @@ $$
 
 三角形面的生成用 `generate_triangles`函数即可。
 
+
+
+---
+
 ### 实验结果
 
 ![surface_res1](img/surface_res1.PNG)
@@ -145,6 +170,8 @@ $$
 ![surface_res2](img/surface_res2.PNG)
 
 ![surface_res3](img/surface_res3.PNG)
+
+<div style="page-break-after: always;"></div>
 
 ## 拓展：曲面的闭合问题
 
