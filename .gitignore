@@ -1,8 +1,8 @@
 .vscode/*
 build
 sample_solution
-CMakeLists.txt
 glfw
 evaluate.sh
 starter1/CMakeLists.txt
 .DS_Store
+*.zip
