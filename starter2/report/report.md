@@ -62,11 +62,11 @@ $$
 I = I_{\text{ambient}} + \sum_{i \in \text{lights}} \left( I_{\text{diffuse},i} + I_{\text{specular},i} \right)
 $$
 
+
+
 ---
 
-### 实验结果
 
-<div style="page-break-after: always;"></div>
 
 ## 任务二：光线投射
 
@@ -132,10 +132,6 @@ $$
 
 ---
 
-### 实验结果
-
-截图等小黄同学做完我一起弄？
-
 
 
 ## 任务三：光线追踪与阴影投射
@@ -175,10 +171,6 @@ $$
 同时，对于光线追踪和阴影投射两个任务，我都将反射光线/阴影光线沿其方向移动了一个小量（`eps = 1e-4`）。这可以避免光线与发射的物体本身相交，产生self shading问题。
 
 ---
-
-### 实验结果
-
-
 
 
 
@@ -262,7 +254,14 @@ for (int y = 0; y < h; ++y){
 
 ---
 
+
+
 ### 实验结果
 
+![result1](pics/result1.png)
 
+![result2](pics/result2.png)
 
+![antialiasing1](pics/antialiasing1.jpeg)
+
+![antialiasing2](pics/antialiasing2.jpeg)
