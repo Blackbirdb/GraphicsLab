@@ -140,6 +140,7 @@ bool Plane::intersect(const Ray &r, float tmin, Hit &h) const
 
 bool Triangle::intersect(const Ray &r, float tmin, Hit &h) const
 {
+
     Vector3f u = _v[1] - _v[0];
     Vector3f v = _v[2] - _v[0];
     Vector3f n = Vector3f::cross(u, v).normalized();
