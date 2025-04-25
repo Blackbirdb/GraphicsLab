@@ -8,6 +8,8 @@
 
 #include <limits>
 
+#define eps 1e-4f
+
 Renderer::Renderer(const ArgParser &args) : _args(args),
                                             _scene(args.input_file)
 {
@@ -69,7 +71,7 @@ void Renderer::Render()
 }
 
 Vector3f
-Renderer::traceRay(const Ray &r,
+Renderer::traceRay(const Ray &r,    
                    float tmin,
                    int bounces,
                    Hit &h) const
@@ -78,6 +80,7 @@ Renderer::traceRay(const Ray &r,
     {
         Material *material = h.getMaterial();
         Vector3f hitPoint = r.pointAtParameter(h.getT());
+        Vector3f normal = h.getNormal().normalized();
         Vector3f finalColor = Vector3f::ZERO;
 
         finalColor += _scene.getAmbientLight() * material->getDiffuseColor();
@@ -91,7 +94,34 @@ Renderer::traceRay(const Ray &r,
 
             light->getIllumination(hitPoint, dirToLight, lightIntensity, distToLight);
 
+            // shadow
+            Ray shadowRay(hitPoint + eps * dirToLight, dirToLight);
+            Hit shadowHit;
+
+            if (_scene.getGroup()->intersect(shadowRay, tmin, shadowHit))
+            {
+                if (shadowHit.getT() < distToLight)
+                {
+                    continue;
+                }
+            }
+
             finalColor += material->shade(r, h, dirToLight, lightIntensity);
+        }
+
+        // Reflection
+        if (bounces > 0)
+        {
+            Vector3f incident = r.getDirection().normalized();
+            Vector3f reflectDir = incident - 2 * Vector3f::dot(incident, normal) * normal;
+            reflectDir.normalize();
+
+            Ray reflectRay(hitPoint + eps * reflectDir, reflectDir);
+
+            Hit reflectedHit;
+            Vector3f reflectedColor = traceRay(reflectRay, tmin, bounces - 1, reflectedHit);
+
+            finalColor += material->getSpecularColor() * reflectedColor;
         }
 
         return finalColor;
