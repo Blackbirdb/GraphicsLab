@@ -116,7 +116,7 @@ Renderer::traceRay(const Ray &r,
         if (bounces > 0)
         {
             Vector3f incident = r.getDirection().normalized();
-            Vector3f reflectDir = incident - 2 * Vector3f::dot(incident, normal) * normal;
+            Vector3f reflectDir = incident + 2 * Vector3f::dot(incident, normal) * normal;
             reflectDir.normalize();
 
             Ray reflectRay(hitPoint + eps * reflectDir, reflectDir);

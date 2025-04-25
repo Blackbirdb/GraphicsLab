@@ -24,7 +24,7 @@ Vector3f Material::shade(const Ray &ray,
     Vector3f diffuse = clamp(L, N) * lightIntensity * _diffuseColor;
 
     Vector3f V = -ray.getDirection().normalized();
-    Vector3f R = (2.0f * Vector3f::dot(L, N) * N - L).normalized();
+    Vector3f R = (2.0f * clamp(L, N) * N - L).normalized();
     float specularFactor = powf(clamp(R, V), _shininess);
     Vector3f specular = specularFactor * lightIntensity * _specularColor;
 
