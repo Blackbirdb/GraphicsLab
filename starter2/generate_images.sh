@@ -6,12 +6,12 @@ BIN=build/a2
 
 # Basic tests
 ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene01_plane.txt  -output out/basics/a01.png -normals out/basics/a01n.png -depth 8 18 out/basics/a01d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene02_cube.txt   -output out/basics/a02.png -normals out/basics/a02n.png -depth 8 18 out/basics/a02d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene03_sphere.txt -output out/basics/a03.png -normals out/basics/a03n.png -depth 8 18 out/basics/a03d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene04_axes.txt   -output out/basics/a04.png -normals out/basics/a04n.png -depth 8 18 out/basics/a04d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene05_bunny_200.txt -output out/basics/a05.png -normals out/basics/a05n.png -depth 0.8 1.0 out/basics/a05d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene06_bunny_1k.txt -bounces 4 -output out/basics/a06.png -normals out/basics/a06n.png -depth 8 18 out/basics/a06d.png
-# ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene07_arch.txt -bounces 4 -shadows -output out/basics/a07.png -normals out/basics/a07n.png -depth 8 18 out/basics/a07d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene02_cube.txt   -output out/basics/a02.png -normals out/basics/a02n.png -depth 8 18 out/basics/a02d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene03_sphere.txt -output out/basics/a03.png -normals out/basics/a03n.png -depth 8 18 out/basics/a03d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene04_axes.txt   -output out/basics/a04.png -normals out/basics/a04n.png -depth 8 18 out/basics/a04d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene05_bunny_200.txt -output out/basics/a05.png -normals out/basics/a05n.png -depth 0.8 1.0 out/basics/a05d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene06_bunny_1k.txt -bounces 4 -output out/basics/a06.png -normals out/basics/a06n.png -depth 8 18 out/basics/a06d.png
+${BIN} -size ${SIZE1} ${SIZE2} -input data/scene07_arch.txt -bounces 4 -shadows -output out/basics/a07.png -normals out/basics/a07n.png -depth 8 18 out/basics/a07d.png
 
 # jitter
 # ${BIN} -size ${SIZE1} ${SIZE2} -input data/scene01_plane.txt  -output out/jitter/a01.png -normals out/jitter/a01n.png -depth 8 18 out/jitter/a01d.png -jitter
