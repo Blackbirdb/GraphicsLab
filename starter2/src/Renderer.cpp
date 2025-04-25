@@ -15,12 +15,6 @@ Renderer::Renderer(const ArgParser &args) : _args(args),
 {
 }
 
-/**
- * Expected behavior for super-sampling:
- * 1. -jitter=true, -filter=false: Jittered super-sampling, no filtering, return image with resolution (3 * w, 3 * h)
- * 2. -jitter=false, -filter=true: Regular super-sampling with Gaussian filter
- * 3. -jitter=true, -filter=true: Jittered super-sampling with Gaussian filter
- */
 
 void Renderer::Render()
 {
@@ -33,15 +27,11 @@ void Renderer::Render()
 
     if (!_args.jitter && !_args.filter){
         // no super-sampling
-        image = Image(w, h);
-        nimage = Image(w, h);
-        dimage = Image(w, h);
-
-        vanillaRendering(w, h, image, nimage, dimage);
+        vanillaSampling(w, h, image, nimage, dimage);
     }
 
-    else{
-        // super-sampling
+    else if (_args.filter){
+        // filter
         int super_w = w * 3;
         int super_h = h * 3;
 
@@ -49,26 +39,23 @@ void Renderer::Render()
         Image superNImage(super_w, super_h);
         Image superDImage(super_w, super_h);
 
-        // jittering
+        // filter + jitter
         if (_args.jitter){
-            jitteredRendering(super_w, super_h,
+            jitteredSampling(super_w, super_h,
                 superImage, superNImage, superDImage);
         }
         else{
-            vanillaRendering(super_w, super_h,
+            vanillaSampling(super_w, super_h,
                 superImage, superNImage, superDImage);
         }
-        // filtering
-        if (_args.filter){
-            image = ApplyGaussianFilter(superImage, w, h);
-            nimage = ApplyGaussianFilter(superNImage, w, h);
-            dimage = ApplyGaussianFilter(superDImage, w, h);
-        }
-        else{
-            image = superImage;
-            nimage = superNImage;
-            dimage = superDImage;
-        }
+        
+        image = ApplyGaussianFilter(superImage, w, h);
+        nimage = ApplyGaussianFilter(superNImage, w, h);
+        dimage = ApplyGaussianFilter(superDImage, w, h);
+    }
+    // jitter
+    else if (_args.jitter){
+        jitteredSampling(w, h, image, nimage, dimage);
     }
 
     // save the files
@@ -185,11 +172,7 @@ float Renderer::clamp (float x, float min, float max){
 }
 
 
-/**
- * Vanilla rendering. Renders image, nimage and dimage by modifying the
- * passed references to images.
- */
-void Renderer::vanillaRendering(int w, int h,
+void Renderer::vanillaSampling(int w, int h,
                                 Image& image, Image& nimage, Image& dimage){
 
     Camera* cam = _scene.getCamera();
@@ -217,33 +200,48 @@ void Renderer::vanillaRendering(int w, int h,
 }
 
 /**
- * Jittered rendering. Assumes w, h are the super-sampled size of the images.
+ * Jittered sampling. Samples 16 rays per pixel, each with a random offset.
  */
-void Renderer::jitteredRendering(int w, int h,
+void Renderer::jitteredSampling(int w, int h,
                                  Image& image, Image& nimage, Image& dimage){
     
     Camera* cam = _scene.getCamera();
+    int samples = 16;
 
     for (int y = 0; y < w; ++y){
         for (int x = 0; x < h; ++x){
-            
-            float jitter_x = (x + drand48()) / (w - 1.0f); 
-            float jitter_y = (y + drand48()) / (h - 1.0f);
 
-            float ndcx = 2.0f * jitter_x - 1.0f;
-            float ndcy = 2.0f * jitter_y - 1.0f;
+            Vector3f color_sum = Vector3f::ZERO;
+            Vector3f normal_sum = Vector3f::ZERO;
+            Vector3f depth_sum = Vector3f::ZERO;
 
-            Ray r = cam->generateRay(Vector2f(ndcx, ndcy));
+            for (int s = 0; s < samples; ++s){
+                
+                float jitter_x = (rand() / (float) RAND_MAX) - 0.5f; 
+                float jitter_y = (rand() / (float) RAND_MAX) - 0.5f; 
 
-            Hit hit;
-            Vector3f color = traceRay(r, cam->getTMin(), _args.bounces, hit);
+                float ndcx = 2 * ((x + 0.5f + jitter_x) / w) - 1.0f;
+                float ndcy = 2 * ((y + 0.5f + jitter_y) / h) - 1.0f;
 
-            image.setPixel(x, y, color);
-            nimage.setPixel(x, y, (hit.getNormal() + 1.0f) / 2.0f);
+                Ray r = cam->generateRay(Vector2f(ndcx, ndcy));
+                Hit hit;
+                Vector3f color = traceRay(r, cam->getTMin(), _args.bounces, hit);
+
+                color_sum += color;
+                normal_sum += (hit.getNormal() + 1.0f) / 2.0f;
+
+                float range = (_args.depth_max - _args.depth_min);
+                if (range){
+                    depth_sum += Vector3f((hit.t - _args.depth_min) / range);
+                }
+            }
+
+            image.setPixel(x, y, color_sum / samples);
+            nimage.setPixel(x, y, normal_sum / samples);
 
             float range = _args.depth_max - _args.depth_min;
             if (range > 0){
-                dimage.setPixel(x, y, Vector3f((hit.t - _args.depth_min) / range));
+                dimage.setPixel(x, y, depth_sum);
             }
         }
     }

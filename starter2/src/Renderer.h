@@ -23,10 +23,10 @@ private:
 
 	float clamp(float x, float min, float max);
 
-	void vanillaRendering(int w, int h,
+	void vanillaSampling(int w, int h,
 		Image& image, Image& nimage, Image& dimage);
 	
-	void jitteredRendering(int w, int h,
+	void jitteredSampling(int w, int h,
 		Image& image, Image& nimage, Image& dimage);
 	
 	ArgParser _args;
