@@ -97,7 +97,7 @@ Renderer::traceRay(const Ray &r,
 
             light->getIllumination(hitPoint, dirToLight, lightIntensity, distToLight);
 
-            // shadow
+            // shadow 
             if (_args.shadows){
                 Ray shadowRay(hitPoint + eps * dirToLight, dirToLight);
                 Hit shadowHit;
@@ -116,8 +116,7 @@ Renderer::traceRay(const Ray &r,
         if (bounces > 0)
         {
             Vector3f incident = r.getDirection().normalized();
-            Vector3f reflectDir = incident + 2 * Vector3f::dot(incident, normal) * normal;
-            reflectDir.normalize();
+            Vector3f reflectDir = (incident + 2 * Vector3f::dot(incident, normal) * normal).normalized();
 
             Ray reflectRay(hitPoint + eps * reflectDir, reflectDir);
 
@@ -138,6 +137,7 @@ Renderer::traceRay(const Ray &r,
 
 /**
  * Applies Gaussian filter to a super sampled image.
+ * Assumes img is a super-sampled image.
  * Returns downsampled image with resolution (w, h).
  */
 Image Renderer::ApplyGaussianFilter(const Image& img, int w, int h){
