@@ -3,3 +3,5 @@ build
 glfw
 .DS_Store
 *.zip
+.DS_Store
+starter1/.DS_Store
