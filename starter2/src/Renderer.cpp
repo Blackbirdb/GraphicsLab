@@ -130,7 +130,6 @@ Renderer::traceRay(const Ray &r,
     }
     else
     {
-        h.t = 0;
         return _scene.getBackgroundColor(r.getDirection());
     }
 }
