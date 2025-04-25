@@ -95,14 +95,14 @@ Renderer::traceRay(const Ray &r,
             light->getIllumination(hitPoint, dirToLight, lightIntensity, distToLight);
 
             // shadow
-            Ray shadowRay(hitPoint + eps * dirToLight, dirToLight);
-            Hit shadowHit;
+            if (_args.shadows){
+                Ray shadowRay(hitPoint + eps * dirToLight, dirToLight);
+                Hit shadowHit;
 
-            if (_scene.getGroup()->intersect(shadowRay, tmin, shadowHit))
-            {
-                if (shadowHit.getT() < distToLight)
-                {
-                    continue;
+                if (_scene.getGroup()->intersect(shadowRay, tmin, shadowHit)){
+                    if (shadowHit.getT() < distToLight){
+                        continue;
+                    }
                 }
             }
 
