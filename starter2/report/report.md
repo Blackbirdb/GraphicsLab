@@ -259,6 +259,8 @@ source generate_images.sh
 
 测试拓展部分请自行修改 `generate_images.sh`.
 
+法向量图和深度图见 `starter2/out/basics` .
+
 ![result1](pics/result1.png)
 
 ![result2](pics/result2.png)
